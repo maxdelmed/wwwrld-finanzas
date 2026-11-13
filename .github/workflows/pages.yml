@@ -1,0 +1,39 @@
+name: Publicar Mis finanzas
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.publicar.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/configure-pages@v5
+      - run: npm ci
+      - run: npm run build -- --base=/wwwrld-finanzas/
+        env:
+          VITE_SUPABASE_URL: https://aunlskolptnvblfwfdew.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_bd7Yby_f6zV9_4yGP09rvA_KjXW9SQ9
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+      - uses: actions/deploy-pages@v4
+        id: publicar
